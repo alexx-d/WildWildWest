@@ -17,8 +17,16 @@ public class ComponentPool<T> : MonoBehaviour where T : Component
     {
         _pool = new ObjectPool<T>(
             createFunc: () => Instantiate(_prefab, _container),
-            actionOnGet: null,
-            actionOnRelease: (obj) => obj.gameObject.SetActive(false),
+            actionOnGet: (obj) => obj.gameObject.SetActive(true),
+            actionOnRelease: (obj) =>
+            {
+                if (obj.transform.parent != _container)
+                {
+                    obj.transform.SetParent(_container);
+                }
+
+                obj.gameObject.SetActive(false);
+            },
             actionOnDestroy: (obj) => Destroy(obj.gameObject),
             collectionCheck: false,
             defaultCapacity: _poolCapacity,

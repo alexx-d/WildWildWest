@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ef4582bfcd434a4cbd69181bf976d6d, type: 3}
   m_Name: Bandito
   m_EditorClassIdentifier: 
-  _maxHealth: 100
-  _moveSpeed: 5
+  _maxHealth: 200
+  _moveSpeed: 2
   _headMultiplier: 2
   _torsoMultiplier: 1
   _limbMultiplier: 0.5

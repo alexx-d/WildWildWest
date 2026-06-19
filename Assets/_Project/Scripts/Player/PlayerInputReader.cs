@@ -7,11 +7,14 @@ public class PlayerInputReader : MonoBehaviour, Controls.IPlayerActions
     public event Action<Vector2> Moved;
     public event Action<Vector2> Looked;
 
-    public event Action Jumped;
-    public event Action<bool> Crouched;
+    public event Action JumpPressed;
+    public event Action ReloadPressed;
+    public event Action<bool> CrouchPressed;
 
     public event Action ShootPressed;
     public event Action ShootReleased;
+    public event Action AimPressed;
+    public event Action AimReleased;
     public event Action<float> WeaponScrolled;
 
     private Controls _controls;
@@ -55,6 +58,18 @@ public class PlayerInputReader : MonoBehaviour, Controls.IPlayerActions
         }
     }
 
+    public void OnAim(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            AimPressed?.Invoke();
+        }
+        else if (context.canceled)
+        {
+            AimReleased?.Invoke();
+        }
+    }
+
     public void OnScrollWeapon(InputAction.CallbackContext context)
     {
         if (context.performed == false)
@@ -71,7 +86,7 @@ public class PlayerInputReader : MonoBehaviour, Controls.IPlayerActions
     {
         if (context.phase == InputActionPhase.Started)
         {
-            Jumped?.Invoke();
+            JumpPressed?.Invoke();
         }
     }
 
@@ -79,11 +94,19 @@ public class PlayerInputReader : MonoBehaviour, Controls.IPlayerActions
     {
         if (context.started)
         {
-            Crouched?.Invoke(true);
+            CrouchPressed?.Invoke(true);
         }
         else if (context.canceled)
         {
-            Crouched?.Invoke(false);
+            CrouchPressed?.Invoke(false);
+        }
+    }
+
+    public void OnReload(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Started)
+        {
+            ReloadPressed?.Invoke();
         }
     }
 }

@@ -26,14 +26,14 @@ public class Health : MonoBehaviour, IDamageable
         }
     }
 
-    public void TakeDamage(float baseDamage, HitboxType hitboxType)
+    public float TakeDamage(float baseDamage, HitboxType hitboxType)
     {
         if (_currentHealth <= 0 || baseDamage < 0)
         {
-            return;
+            return 0;
         }
-
         float finalDamage = baseDamage * _config.GetMultiplier(hitboxType);
+
         _currentHealth = Mathf.Clamp(_currentHealth - finalDamage, 0, MaxHealth);
 
         Damaged?.Invoke(_currentHealth);
@@ -42,6 +42,8 @@ public class Health : MonoBehaviour, IDamageable
         {
             Die();
         }
+
+        return finalDamage;
     }
 
     public void Heal(float amount)
@@ -54,6 +56,11 @@ public class Health : MonoBehaviour, IDamageable
         _currentHealth = Mathf.Clamp(_currentHealth + amount, 0, MaxHealth);
 
         Healed?.Invoke(_currentHealth);
+    }
+
+    public void ResetHealth()
+    {
+        _currentHealth = _config.MaxHealth;
     }
 
     private void Die()

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class Weapon : MonoBehaviour
@@ -8,10 +9,47 @@ public class Weapon : MonoBehaviour
 
     private float _nextFireTime;
     private bool _isTriggerPulled;
+    private bool _isAiming;
+
+    private int _currentAmmo;
+    private bool _isReloading;
 
     public int AnimIndex => _data.AnimIndex;
+    public float RecoilPitch => _data.RecoilPitch;
+    public float RecoilYaw => _data.RecoilYaw;
+    public int CurrentAmmo => _currentAmmo;
+    public int MagazineSize => _data.MagazineSize;
+    public bool IsReloading => _isReloading;
+    public float CurrentSpread
+    {
+        get
+        {
+            float spread = _data.Spread;
+
+            if (_isAiming)
+            {
+                spread *= _data.AimSpreadMultiplier;
+            }
+
+            return spread;
+        }
+    }
 
     public event Action Fired;
+    public event Action ReloadStarted;
+    public event Action AmmoChanged;
+
+    private void Awake()
+    {
+        _currentAmmo = _data.MagazineSize;
+    }
+    private void Update()
+    {
+        if (_isTriggerPulled)
+        {
+            TryExecuteShot();
+        }
+    }
 
     public void Initialize(Camera playerCamera)
     {
@@ -31,23 +69,51 @@ public class Weapon : MonoBehaviour
         _isTriggerPulled = false;
     }
 
-    private void Update()
+    public void SetAimState(bool isAiming)
     {
-        if (_isTriggerPulled)
+        _isAiming = isAiming;
+    }
+
+    public void StartReload()
+    {
+        if (_isReloading || _currentAmmo == _data.MagazineSize)
         {
-            TryExecuteShot();
+            return;
         }
+
+        StartCoroutine(ReloadCoroutine());
+    }
+
+    private IEnumerator ReloadCoroutine()
+    {
+        _isReloading = true;
+        ReloadStarted?.Invoke();
+
+        yield return new WaitForSeconds(_data.ReloadDuration);
+
+        _currentAmmo = _data.MagazineSize;
+        _isReloading = false;
+
+        AmmoChanged?.Invoke();
     }
 
     private void TryExecuteShot()
     {
-        if (Time.time < _nextFireTime)
+        if (_isReloading || Time.time < _nextFireTime)
         {
+            return;
+        }
+
+        if (_currentAmmo <= 0)
+        {
+            StartReload();
             return;
         }
 
         _nextFireTime = Time.time + _data.FireRate;
 
+        _currentAmmo--;
+        AmmoChanged?.Invoke();
         Fired?.Invoke();
 
         if (_data.IsProjectileBased)
@@ -55,12 +121,26 @@ public class Weapon : MonoBehaviour
         }
         else
         {
-            _hitscanShooter.Fire(_data.Damage, _data.Range, _data.Spread, Vector3.zero);
+            float currentSpread = _data.Spread;
+
+            if (_isAiming)
+            {
+                currentSpread *= _data.AimSpreadMultiplier;
+            }
+
+            _hitscanShooter.Fire(_data.Damage, _data.Range, currentSpread, Vector3.zero);
         }
     }
 
     private void OnDisable()
     {
         _isTriggerPulled = false;
+        _isAiming = false;
+
+        if (_isReloading)
+        {
+            StopAllCoroutines();
+            _isReloading = false;
+        }
     }
 }

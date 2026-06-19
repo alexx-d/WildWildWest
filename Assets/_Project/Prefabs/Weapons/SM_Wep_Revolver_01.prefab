@@ -260,10 +260,12 @@ GameObject:
   - component: {fileID: 4962712504198836}
   - component: {fileID: 5920395101074839316}
   - component: {fileID: 713445215269443293}
-  - component: {fileID: 5488297948669595836}
   - component: {fileID: 511287474467312603}
   - component: {fileID: 5372071893936004}
   - component: {fileID: 4571944024076794451}
+  - component: {fileID: 680446041641128055}
+  - component: {fileID: 3392219422015494240}
+  - component: {fileID: 4006285185910566112}
   m_Layer: 0
   m_Name: SM_Wep_Revolver_01
   m_TagString: Untagged
@@ -317,23 +319,6 @@ MonoBehaviour:
   _shootableLayers:
     serializedVersion: 2
     m_Bits: 1088
---- !u!114 &5488297948669595836
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1902353365401686}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e36e94e6996fd7c4aa2668cb8b6f434e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _shooter: {fileID: 713445215269443293}
-  _bloodImpactPool: {fileID: 511287474467312603}
-  _sparkImpactPool: {fileID: 4571944024076794451}
-  _tracerTrailPool: {fileID: 5372071893936004}
-  _tracerDuration: 0.04
 --- !u!114 &511287474467312603
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -379,6 +364,58 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _prefab: {fileID: 8570737582665733546, guid: 294dcb7f17d463547ac578472b10c38b, type: 3}
+  _poolCapacity: 20
+  _poolMaxSize: 50
+  _container: {fileID: 4962712504198836}
+--- !u!114 &680446041641128055
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1902353365401686}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ebea9e0b7f87a14d88294b92e335ba1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _prefab: {fileID: 5121401935080579679, guid: b6ba8e7f306828d4fb1c8e0d0ec81cc3, type: 3}
+  _poolCapacity: 20
+  _poolMaxSize: 50
+  _container: {fileID: 4962712504198836}
+--- !u!114 &3392219422015494240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1902353365401686}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 465362a71a6886f46b86380e3a1b8e8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _shooter: {fileID: 713445215269443293}
+  _bloodImpactPool: {fileID: 511287474467312603}
+  _sparkImpactPool: {fileID: 4571944024076794451}
+  _muzzleFlashPool: {fileID: 680446041641128055}
+  _tracerTrailPool: {fileID: 5372071893936004}
+  _damagePopupPool: {fileID: 4006285185910566112}
+  _tracerDuration: 0.04
+  _damageScatterRadius: 0.1
+--- !u!114 &4006285185910566112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1902353365401686}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f35561b9fa0ad2042a37ea897b5a364c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _prefab: {fileID: 9051772407166274533, guid: ce45813f67446ff48b8cbc188ffdaa07, type: 3}
   _poolCapacity: 20
   _poolMaxSize: 50
   _container: {fileID: 4962712504198836}
@@ -439,9 +476,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5609017000321649032}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.60808665, y: -0.4058577, z: 0.4726622, w: -0.49203727}
-  m_LocalPosition: {x: -0.02, y: 0.03, z: -0.02}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: -0.42983398, y: 0.43220106, z: -0.6254323, w: 0.48711342}
+  m_LocalPosition: {x: 0.091, y: 0.029, z: -0.049}
+  m_LocalScale: {x: 1.15, y: 1.15, z: 1.15}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4472006624568314}
@@ -449,7 +486,7 @@ Transform:
   - {fileID: 4043528069241060}
   - {fileID: 7450837471135431572}
   m_Father: {fileID: 4962712504198836}
-  m_LocalEulerAnglesHint: {x: -12.4, y: -265.95, z: -101}
+  m_LocalEulerAnglesHint: {x: 7, y: 75, z: -98.8}
 --- !u!23 &2064516948933994581
 MeshRenderer:
   m_ObjectHideFlags: 0

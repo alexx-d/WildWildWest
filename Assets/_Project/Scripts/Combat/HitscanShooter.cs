@@ -6,7 +6,7 @@ public class HitscanShooter : MonoBehaviour
     [SerializeField] private Transform _muzzleFlashPoint;
     [SerializeField] private LayerMask _shootableLayers;
 
-    public event Action<Vector3, Vector3, Vector3, bool> ShotHit;
+    public event Action<Vector3, Vector3, Vector3, bool, int> ShotHit;
     public event Action<Vector3, Vector3> ShotMissed;
 
     private Camera _mainCamera;
@@ -28,6 +28,7 @@ public class HitscanShooter : MonoBehaviour
         if (Physics.Raycast(rayOrigin, targetDirection, out RaycastHit hit, range, _shootableLayers))
         {
             bool isCharacter = false;
+            int damageDealt = 0;
 
             if (hit.collider.TryGetComponent<Hitbox>(out Hitbox hitbox))
             {
@@ -35,11 +36,11 @@ public class HitscanShooter : MonoBehaviour
 
                 if (hitbox.ParentDamageable != null)
                 {
-                    hitbox.ParentDamageable.TakeDamage(damage, hitbox.Type);
+                    damageDealt = Mathf.RoundToInt(hitbox.ParentDamageable.TakeDamage(damage, hitbox.Type));
                 }
             }
 
-            ShotHit?.Invoke(muzzlePosition, hit.point, hit.normal, isCharacter);
+            ShotHit?.Invoke(muzzlePosition, hit.point, hit.normal, isCharacter, damageDealt);
         }
         else
         {

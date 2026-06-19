@@ -14,6 +14,7 @@ public class CharacterData : ScriptableObject
     [SerializeField] private float _weakPointMultiplier = 3f;
 
     public float MaxHealth => _maxHealth;
+    public float MoveSpeed => _moveSpeed;
 
     public float GetMultiplier(HitboxType type)
     {

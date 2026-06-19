@@ -12,8 +12,19 @@ public class Player : MonoBehaviour
     [SerializeField] private WeaponInventory _weaponInventory;
 
     [SerializeField] private PlayerAnimation _animation;
+    [SerializeField] private WeaponUI _weaponUI;
+    [SerializeField] private CrosshairUI _crosshairUI;
 
     private Weapon _activeWeapon;
+    private bool _isAimingRequested;
+
+    private void Update()
+    {
+        if (_activeWeapon != null)
+        {
+            _crosshairUI.UpdateSpread(_activeWeapon.CurrentSpread);
+        }
+    }
 
     private void OnEnable()
     {
@@ -21,14 +32,17 @@ public class Player : MonoBehaviour
         _input.Moved += _animation.PlayMove;
         _input.Looked += _rotation.SetLookDelta;
 
-        _input.Jumped += OnJumpRequested;
-        _input.Crouched += _mover.SetCrouchState;
-        _input.Crouched += _crouchController.SetCrouchState;
-        _input.Crouched += _animation.SetCrouched;
+        _input.JumpPressed += OnJumpRequested;
+        _input.CrouchPressed += _mover.SetCrouchState;
+        _input.CrouchPressed += _crouchController.SetCrouchState;
+        _input.CrouchPressed += _animation.SetCrouched;
         _groundDetector.GroundedChanged += _animation.SetGrounded;
 
         _input.ShootPressed += OnShootPressed;
         _input.ShootReleased += OnShootReleased;
+        _input.AimPressed += OnAimPressed;
+        _input.AimReleased += OnAimReleased;
+        _input.ReloadPressed += OnReloadRequested;
         _input.WeaponScrolled += _weaponInventory.ScrollWeapon;
 
         _weaponInventory.WeaponChanged += OnWeaponChanged;
@@ -45,14 +59,17 @@ public class Player : MonoBehaviour
         _input.Moved -= _animation.PlayMove;
         _input.Looked -= _rotation.SetLookDelta;
 
-        _input.Jumped -= OnJumpRequested;
-        _input.Crouched -= _mover.SetCrouchState;
-        _input.Crouched -= _crouchController.SetCrouchState;
-        _input.Crouched -= _animation.SetCrouched;
+        _input.JumpPressed -= OnJumpRequested;
+        _input.CrouchPressed -= _mover.SetCrouchState;
+        _input.CrouchPressed -= _crouchController.SetCrouchState;
+        _input.CrouchPressed -= _animation.SetCrouched;
         _groundDetector.GroundedChanged -= _animation.SetGrounded;
 
         _input.ShootPressed -= OnShootPressed;
         _input.ShootReleased -= OnShootReleased;
+        _input.AimPressed -= OnAimPressed;
+        _input.AimReleased -= OnAimReleased;
+        _input.ReloadPressed -= OnReloadRequested;
         _input.WeaponScrolled -= _weaponInventory.ScrollWeapon;
 
         _weaponInventory.WeaponChanged -= OnWeaponChanged;
@@ -80,25 +97,77 @@ public class Player : MonoBehaviour
         }
     }
 
+    private void OnAimPressed()
+    {
+        _isAimingRequested = true;
+        UpdateAimState();
+    }
+
+    private void OnAimReleased()
+    {
+        _isAimingRequested = false;
+        UpdateAimState();
+    }
+
+    private void UpdateAimState()
+    {
+        if (_activeWeapon != null && _isAimingRequested)
+        {
+            _activeWeapon.SetAimState(true);
+            _rotation.StartAiming();
+        }
+        else
+        {
+            if (_activeWeapon != null)
+            {
+                _activeWeapon.SetAimState(false);
+            }
+            _rotation.StopAiming();
+        }
+    }
+
+    private void OnReloadRequested()
+    {
+        if (_activeWeapon != null)
+        {
+            _activeWeapon.StartReload();
+        }
+    }
+
     private void OnWeaponChanged(Weapon newWeapon)
     {
         if (_activeWeapon != null)
         {
             _activeWeapon.Fired -= OnWeaponFired;
+            _activeWeapon.ReloadStarted -= OnWeaponReloadStarted;
+            _activeWeapon.ReleaseTrigger();
         }
 
         _activeWeapon = newWeapon;
+        _weaponUI.UpdateActiveWeapon(_activeWeapon);
 
         if (_activeWeapon != null)
         {
             _animation.SetWeaponHoldType(_activeWeapon.AnimIndex);
             _activeWeapon.Fired += OnWeaponFired;
+            _activeWeapon.ReloadStarted += OnWeaponReloadStarted;
+            UpdateAimState();
         }
     }
 
     private void OnWeaponFired()
     {
         _animation.PlayAttack();
+
+        if (_activeWeapon != null && _rotation != null)
+        {
+            _rotation.ApplyRecoil(_activeWeapon.RecoilPitch, _activeWeapon.RecoilYaw);
+        }
+    }
+
+    private void OnWeaponReloadStarted()
+    {
+        //_animation.PlayReload();
     }
 
     private void OnJumpRequested()

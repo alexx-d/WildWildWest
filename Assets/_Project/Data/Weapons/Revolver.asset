@@ -17,6 +17,13 @@ MonoBehaviour:
   _fireRate: 1
   _spread: 0.02
   _range: 100
+  _recoilPitch: 5
+  _recoilYawMin: -0.5
+  _recoilYawMax: 0.5
+  _aimFOV: 40
+  _aimSpreadMultiplier: 0.3
+  _magazineSize: 6
+  _reloadDuration: 2
   _isProjectileBased: 0
   _bulletSpeed: 50
   _bulletPrefab: {fileID: 0}
