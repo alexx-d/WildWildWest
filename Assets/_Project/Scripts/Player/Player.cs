@@ -1,9 +1,10 @@
 using UnityEngine;
+using System;
 
 public class Player : MonoBehaviour
 {
     [SerializeField] private PlayerInputReader _input;
-
+    [SerializeField] private Health _playerHealth;
     [SerializeField] private PlayerMover _mover;
     [SerializeField] private PlayerCrouch _crouchController;
     [SerializeField] private PlayerRotation _rotation;
@@ -17,6 +18,14 @@ public class Player : MonoBehaviour
 
     private Weapon _activeWeapon;
     private bool _isAimingRequested;
+
+    public Health Health => _playerHealth;
+    public event Action Died;
+
+    public float DamageMultiplier { get; private set; } = 1f;
+    public float ReloadSpeedMultiplier { get; private set; } = 1f;
+    public float FireRateMultiplier { get; private set; } = 1f;
+    public float MoveSpeedMultiplier { get; private set; } = 1f;
 
     private void Update()
     {
@@ -51,6 +60,8 @@ public class Player : MonoBehaviour
         {
             OnWeaponChanged(_weaponInventory.CurrentWeapon);
         }
+
+        _playerHealth.Died += OnPlayerDie;
     }
 
     private void OnDisable()
@@ -78,6 +89,55 @@ public class Player : MonoBehaviour
         {
             _activeWeapon.Fired -= OnWeaponFired;
         }
+
+        _playerHealth.Died -= OnPlayerDie;
+    }
+
+    public void ApplyUpgrade(UpgradeType type, float value, Weapon weaponPrefab)
+    {
+        switch (type)
+        {
+            case UpgradeType.Heal:
+                _playerHealth.Heal(value);
+                break;
+
+            case UpgradeType.NewWeapon:
+                if (weaponPrefab != null)
+                {
+                    _weaponInventory.PickupWeapon(weaponPrefab);
+                }
+                break;
+
+            case UpgradeType.DamageBuff:
+                DamageMultiplier += value;
+                break;
+
+            case UpgradeType.ReloadSpeedBuff:
+                ReloadSpeedMultiplier += value;
+                break;
+
+            case UpgradeType.MoveSpeedBuff:
+                MoveSpeedMultiplier += value;
+                _mover.SetSpeedMultiplier(MoveSpeedMultiplier);
+                _animation.SetSpeedMultiplier(MoveSpeedMultiplier);
+                break;
+        }
+    }
+
+    public void ResetStatus()
+    {
+        _playerHealth.ResetHealth();
+        _weaponInventory.ResetWeapons();
+
+        DamageMultiplier = 1f;
+        ReloadSpeedMultiplier = 1f;
+        FireRateMultiplier = 1f;
+        MoveSpeedMultiplier = 1f;
+        _mover.SetSpeedMultiplier(1f);
+        _animation.SetSpeedMultiplier(1f);
+
+        _isAimingRequested = false;
+        UpdateAimState();
     }
 
     private void OnShootPressed()
@@ -177,5 +237,10 @@ public class Player : MonoBehaviour
             _mover.Jump();
             _animation.PlayJump();
         }
+    }
+
+    private void OnPlayerDie()
+    {
+        Died?.Invoke();
     }
 }

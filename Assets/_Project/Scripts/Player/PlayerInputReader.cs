@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerInputReader : MonoBehaviour, Controls.IPlayerActions
+public class PlayerInputReader : MonoBehaviour, Controls.IPlayerActions, Controls.IUIActions
 {
     public event Action<Vector2> Moved;
     public event Action<Vector2> Looked;
@@ -17,6 +17,9 @@ public class PlayerInputReader : MonoBehaviour, Controls.IPlayerActions
     public event Action AimReleased;
     public event Action<float> WeaponScrolled;
 
+    public event Action PausePressed;
+    public event Action UnpausePressed;
+
     private Controls _controls;
 
     private void OnEnable()
@@ -25,25 +28,38 @@ public class PlayerInputReader : MonoBehaviour, Controls.IPlayerActions
         {
             _controls = new Controls();
             _controls.Player.SetCallbacks(this);
+            _controls.UI.SetCallbacks(this);
         }
-        _controls.Player.Enable();
+
+        EnableGameplayInput();
     }
 
     private void OnDisable()
     {
         _controls.Player.Disable();
+        _controls.UI.Disable();
+    }
+
+    public void EnableGameplayInput()
+    {
+        _controls.UI.Disable();
+        _controls.Player.Enable();
+    }
+
+    public void EnableMenuInput()
+    {
+        _controls.Player.Disable();
+        _controls.UI.Enable();
     }
 
     public void OnLook(InputAction.CallbackContext context)
     {
-        Vector2 lookTarget = context.ReadValue<Vector2>();
-        Looked?.Invoke(lookTarget);
+        Looked?.Invoke(context.ReadValue<Vector2>());
     }
 
     public void OnMove(InputAction.CallbackContext context)
     {
-        Vector2 moveTarget = context.ReadValue<Vector2>();
-        Moved?.Invoke(moveTarget);
+        Moved?.Invoke(context.ReadValue<Vector2>());
     }
 
     public void OnShoot(InputAction.CallbackContext context)
@@ -107,6 +123,22 @@ public class PlayerInputReader : MonoBehaviour, Controls.IPlayerActions
         if (context.phase == InputActionPhase.Started)
         {
             ReloadPressed?.Invoke();
+        }
+    }
+
+    public void OnPause(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Started)
+        {
+            PausePressed?.Invoke();
+        }
+    }
+
+    public void OnUnpause(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Started)
+        {
+            UnpausePressed?.Invoke();
         }
     }
 }

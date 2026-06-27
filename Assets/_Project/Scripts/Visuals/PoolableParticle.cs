@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 
+[RequireComponent(typeof(ParticleSystem))]
 public class PoolableParticle : MonoBehaviour, IPoolable<PoolableParticle>
 {
     public event Action<PoolableParticle> Died;
@@ -13,8 +14,17 @@ public class PoolableParticle : MonoBehaviour, IPoolable<PoolableParticle>
         main.stopAction = ParticleSystemStopAction.Callback;
     }
 
+    private void OnDisable()
+    {
+        if (_particleSystem != null)
+        {
+            _particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+    }
+
     public void Play()
     {
+        _particleSystem.Clear();
         _particleSystem.Play();
     }
 

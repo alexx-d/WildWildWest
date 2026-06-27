@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c089b202afb74b4aaf24c4fce3a895a, type: 3}
+  m_Name: Rifle
+  m_EditorClassIdentifier: 
+  _weaponAnimIndex: 2
+  _damage: 55
+  _fireRate: 0.3
+  _spread: 0.1
+  _range: 100
+  _recoilPitch: 2
+  _recoilYawMin: -1
+  _recoilYawMax: 1
+  _aimFOV: 40
+  _aimSpreadMultiplier: 0.3
+  _magazineSize: 15
+  _reloadDuration: 1.5
+  _isProjectileBased: 0
+  _bulletSpeed: 50
+  _bulletPrefab: {fileID: 0}
+  _icon: {fileID: 21300000, guid: 8f457d73d58991c498b1f132edacb640, type: 3}
+  _assignedSlot: 1

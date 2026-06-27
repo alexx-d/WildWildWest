@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -10,6 +11,8 @@ public class EnemyTargetChase : MonoBehaviour
     private Health _health;
     private Transform _target;
     private float _nextUpdateTime;
+
+    public event Action<float> SpeedChanged;
 
     private void Awake()
     {
@@ -29,6 +32,9 @@ public class EnemyTargetChase : MonoBehaviour
             _nextUpdateTime = Time.time + _pathUpdateInterval;
             _agent.SetDestination(_target.position);
         }
+
+        float currentSpeedNormalized = _agent.velocity.sqrMagnitude > 0.1f ? 1f : 0f;
+        SpeedChanged?.Invoke(currentSpeedNormalized);
     }
 
     private void OnEnable()
@@ -41,10 +47,11 @@ public class EnemyTargetChase : MonoBehaviour
         _health.Died -= OnDeath;
     }
 
-    public void Initialize(CharacterData config, Transform target)
+    public void Initialize(CharacterData config, Transform target, float attackDistance)
     {
         _target = target;
         _agent.speed = config.MoveSpeed;
+        _agent.stoppingDistance = Mathf.Max(0.1f, attackDistance - 0.2f);
         _agent.enabled = true;
     }
 

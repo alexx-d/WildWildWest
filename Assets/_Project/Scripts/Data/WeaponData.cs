@@ -5,7 +5,7 @@ using UnityEngine;
 public class WeaponData : ScriptableObject
 {
     [Header("Animation Settings")]
-    [SerializeField] private int _weaponAnimIndex;
+    [SerializeField] private float _weaponAnimIndex;
 
     [Header("Common Shooting Settings")]
     [SerializeField] private float _damage = 20f;
@@ -33,7 +33,11 @@ public class WeaponData : ScriptableObject
     [SerializeField] private float _bulletSpeed = 50f;
     [SerializeField] private GameObject _bulletPrefab;
 
-    public int AnimIndex => _weaponAnimIndex;
+    [Header("UI Configuration")]
+    [SerializeField] private Sprite _icon;
+    [SerializeField] private int _assignedSlot;
+
+    public float AnimIndex => _weaponAnimIndex;
     public float Damage => _damage;
     public float FireRate => _fireRate;
     public float Spread => _spread;
@@ -47,4 +51,6 @@ public class WeaponData : ScriptableObject
     public bool IsProjectileBased => _isProjectileBased;
     public float BulletSpeed => _bulletSpeed;
     public GameObject BulletPrefab => _bulletPrefab;
+    public Sprite Icon => _icon;
+    public int AssignedSlot => _assignedSlot;
 }

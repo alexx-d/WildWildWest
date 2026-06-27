@@ -2,21 +2,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
-public class ComponentPool<T> : MonoBehaviour where T : Component
+public class ComponentPool<T> where T : Component
 {
-    [SerializeField] private T _prefab;
-    [SerializeField] private int _poolCapacity = 20;
-    [SerializeField] private int _poolMaxSize = 50;
+    private readonly T _prefab;
+    private readonly Transform _container;
+    private readonly ObjectPool<T> _pool;
+    private readonly List<T> _activeObjects = new();
 
-    [SerializeField] private Transform _container;
-
-    private ObjectPool<T> _pool;
-    private readonly List<T> _activeObjects = new List<T>();
-
-    private void Awake()
+    public ComponentPool(T prefab, Transform container, int capacity = 20, int maxSize = 50)
     {
+        _prefab = prefab;
+        _container = container;
+
         _pool = new ObjectPool<T>(
-            createFunc: () => Instantiate(_prefab, _container),
+            createFunc: () => Object.Instantiate(_prefab, _container),
             actionOnGet: (obj) => obj.gameObject.SetActive(true),
             actionOnRelease: (obj) =>
             {
@@ -24,13 +23,12 @@ public class ComponentPool<T> : MonoBehaviour where T : Component
                 {
                     obj.transform.SetParent(_container);
                 }
-
                 obj.gameObject.SetActive(false);
             },
-            actionOnDestroy: (obj) => Destroy(obj.gameObject),
+            actionOnDestroy: (obj) => Object.Destroy(obj.gameObject),
             collectionCheck: false,
-            defaultCapacity: _poolCapacity,
-            maxSize: _poolMaxSize
+            defaultCapacity: capacity,
+            maxSize: maxSize
         );
     }
 
@@ -63,7 +61,6 @@ public class ComponentPool<T> : MonoBehaviour where T : Component
         for (int i = _activeObjects.Count - 1; i >= 0; i--)
         {
             T obj = _activeObjects[i];
-
             if (obj is not null)
             {
                 Release(obj);

@@ -6,6 +6,7 @@ public class Weapon : MonoBehaviour
 {
     [SerializeField] private WeaponData _data;
     [SerializeField] private HitscanShooter _hitscanShooter;
+    [SerializeField] private WeaponFX _weaponFX;
 
     private float _nextFireTime;
     private bool _isTriggerPulled;
@@ -14,7 +15,15 @@ public class Weapon : MonoBehaviour
     private int _currentAmmo;
     private bool _isReloading;
 
-    public int AnimIndex => _data.AnimIndex;
+    private Player _player;
+
+    public event Action Fired;
+    public event Action ReloadStarted;
+    public event Action AmmoChanged;
+
+    public int AssignedSlot => _data.AssignedSlot;
+    public Sprite Icon => _data.Icon;
+    public float AnimIndex => _data.AnimIndex;
     public float RecoilPitch => _data.RecoilPitch;
     public float RecoilYaw => _data.RecoilYaw;
     public int CurrentAmmo => _currentAmmo;
@@ -35,14 +44,16 @@ public class Weapon : MonoBehaviour
         }
     }
 
-    public event Action Fired;
-    public event Action ReloadStarted;
-    public event Action AmmoChanged;
-
     private void Awake()
     {
         _currentAmmo = _data.MagazineSize;
     }
+
+    private void Start()
+    {
+        _player = GetComponentInParent<Player>();
+    }
+
     private void Update()
     {
         if (_isTriggerPulled)
@@ -51,12 +62,10 @@ public class Weapon : MonoBehaviour
         }
     }
 
-    public void Initialize(Camera playerCamera)
+    public void Initialize(Camera playerCamera, Transform worldFXContainer)
     {
-        if (_hitscanShooter != null)
-        {
-            _hitscanShooter.Initialize(playerCamera);
-        }
+        _hitscanShooter.Initialize(playerCamera);
+        _weaponFX.Initialize(worldFXContainer);
     }
 
     public void PullTrigger()
@@ -84,12 +93,27 @@ public class Weapon : MonoBehaviour
         StartCoroutine(ReloadCoroutine());
     }
 
+    public void ResetWeapon()
+    {
+        if (_isReloading)
+        {
+            StopAllCoroutines();
+            _isReloading = false;
+        }
+
+        _isTriggerPulled = false;
+        _isAiming = false;
+
+        _currentAmmo = _data.MagazineSize;
+        AmmoChanged?.Invoke();
+    }
+
     private IEnumerator ReloadCoroutine()
     {
         _isReloading = true;
         ReloadStarted?.Invoke();
 
-        yield return new WaitForSeconds(_data.ReloadDuration);
+        yield return new WaitForSeconds(_data.ReloadDuration / _player.ReloadSpeedMultiplier);
 
         _currentAmmo = _data.MagazineSize;
         _isReloading = false;
@@ -110,7 +134,7 @@ public class Weapon : MonoBehaviour
             return;
         }
 
-        _nextFireTime = Time.time + _data.FireRate;
+        _nextFireTime = Time.time + (_data.FireRate / _player.FireRateMultiplier);
 
         _currentAmmo--;
         AmmoChanged?.Invoke();
@@ -121,14 +145,11 @@ public class Weapon : MonoBehaviour
         }
         else
         {
-            float currentSpread = _data.Spread;
+            float currentSpread = CurrentSpread;
 
-            if (_isAiming)
-            {
-                currentSpread *= _data.AimSpreadMultiplier;
-            }
+            int finalDamage = Mathf.RoundToInt(_data.Damage * _player.DamageMultiplier);
 
-            _hitscanShooter.Fire(_data.Damage, _data.Range, currentSpread, Vector3.zero);
+            _hitscanShooter.Fire(finalDamage, _data.Range, currentSpread, Vector3.zero);
         }
     }
 

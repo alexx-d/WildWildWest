@@ -6,6 +6,7 @@ public static class PlayerAnimatorData
     {
         public static readonly int Horizontal = Animator.StringToHash(nameof(Horizontal));
         public static readonly int Vertical = Animator.StringToHash(nameof(Vertical));
+        public static readonly int AnimSpeedMultiplier = Animator.StringToHash(nameof(AnimSpeedMultiplier));
 
         public static readonly int IsGrounded = Animator.StringToHash(nameof(IsGrounded));
         public static readonly int IsCrouching = Animator.StringToHash(nameof(IsCrouching));

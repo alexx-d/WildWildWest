@@ -13,6 +13,7 @@ public class PlayerMover : MonoBehaviour
     private Transform _mainCameraTransform;
 
     private float _verticalVelocity;
+    private float _speedMultiplier = 1f;
     private Vector2 _moveInput;
     private bool _isCrouching;
 
@@ -40,6 +41,11 @@ public class PlayerMover : MonoBehaviour
     public void SetCrouchState(bool isCrouching)
     {
         _isCrouching = isCrouching;
+    }
+
+    public void SetSpeedMultiplier(float speedMultiplier)
+    {
+        _speedMultiplier = speedMultiplier;
     }
 
     public void Jump()
@@ -81,7 +87,7 @@ public class PlayerMover : MonoBehaviour
 
         float currentSpeed = _isCrouching ? _crouchSpeed : _moveSpeed;
 
-        Vector3 motion = movementDirection * currentSpeed;
+        Vector3 motion = movementDirection * currentSpeed * _speedMultiplier;
         motion.y = _verticalVelocity;
 
         _characterController.Move(motion * Time.deltaTime);

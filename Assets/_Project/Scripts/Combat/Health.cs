@@ -61,11 +61,11 @@ public class Health : MonoBehaviour, IDamageable
     public void ResetHealth()
     {
         _currentHealth = _config.MaxHealth;
+        Healed?.Invoke(_currentHealth);
     }
 
     private void Die()
     {
         Died?.Invoke();
-        gameObject.SetActive(false);
     }
 }

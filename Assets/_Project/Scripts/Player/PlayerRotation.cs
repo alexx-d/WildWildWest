@@ -11,8 +11,7 @@ public class PlayerRotation : MonoBehaviour
     [SerializeField] private CinemachineVirtualCamera _aimCamera;
 
     [Header("Sensitivity")]
-    [SerializeField] private float _sensitivityX = 15f;
-    [SerializeField] private float _sensitivityY = 15f;
+    [SerializeField] private SensitivityData _sensitivityData;
 
     [Header("Limits")]
     [SerializeField] private float _minPitch = -40f;
@@ -36,9 +35,6 @@ public class PlayerRotation : MonoBehaviour
 
     private void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-
         _normalCamera.Priority = 10;
         _aimCamera.Priority = 5;
     }
@@ -47,9 +43,8 @@ public class PlayerRotation : MonoBehaviour
     {
         if (_lookInput != Vector2.zero)
         {
-            transform.Rotate(Vector3.up * _lookInput.x * _sensitivityX * Time.deltaTime);
-
-            _cinemachineTargetPitch -= _lookInput.y * _sensitivityY * Time.deltaTime;
+            transform.Rotate(Vector3.up * _lookInput.x * _sensitivityData.Value * Time.deltaTime);
+            _cinemachineTargetPitch -= _lookInput.y * _sensitivityData.Value * Time.deltaTime;
             _lookInput = Vector2.zero;
         }
 

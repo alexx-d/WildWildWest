@@ -8,48 +8,49 @@ public class WeaponInventory : MonoBehaviour
     [SerializeField] private Transform _weaponHolder;
     [SerializeField] private Camera _playerCamera;
     [SerializeField] private List<Weapon> _startingWeaponPrefabs;
+    [SerializeField] private Transform _worldFXContainer;
 
-    private List<Weapon> _equippedWeapons = new List<Weapon>();
+    private readonly Weapon[] _slots = new Weapon[5];
     private int _currentIndex = -1;
 
+    public event Action<int, Weapon> SlotUpdated;
+    public event Action<int> ActiveSlotChanged;
     public event Action<Weapon> WeaponChanged;
-    public Weapon CurrentWeapon => (_currentIndex >= 0 && _currentIndex < _equippedWeapons.Count) ? _equippedWeapons[_currentIndex] : null;
+
+    public Weapon CurrentWeapon => (IsValidIndex(_currentIndex)) ? _slots[_currentIndex] : null;
+    public int CurrentIndex => _currentIndex;
+    public Weapon[] Slots => _slots;
 
     private void Start()
     {
-        foreach (var prefab in _startingWeaponPrefabs)
-        {
-            if (prefab != null)
-            {
-                PickupWeapon(prefab);
-            }
-        }
+        SpawnStartingWeapons();
     }
 
     public void ScrollWeapon(float scrollDelta)
     {
-        if (_equippedWeapons.Count <= 1)
+        if (GetEquippedWeaponsCount() <= 1)
         {
             return;
         }
 
-        int newIndex = _currentIndex;
+        int step = scrollDelta > 0f ? 1 : -1;
+        int nextIndex = _currentIndex;
 
-        if (scrollDelta > 0f)
+        for (int i = 0; i < _slots.Length; i++)
         {
-            newIndex = (_currentIndex + 1) % _equippedWeapons.Count;
-        }
-        else if (scrollDelta < 0f)
-        {
-            newIndex = (_currentIndex - 1 + _equippedWeapons.Count) % _equippedWeapons.Count;
-        }
+            nextIndex = (nextIndex + step + _slots.Length) % _slots.Length;
 
-        SelectWeapon(newIndex);
+            if (_slots[nextIndex] != null)
+            {
+                SelectWeapon(nextIndex);
+                return;
+            }
+        }
     }
 
     public void SelectWeapon(int index)
     {
-        if (index < 0 || index >= _equippedWeapons.Count || index == _currentIndex)
+        if (IsValidIndex(index) == false || _slots[index] == null || index == _currentIndex)
         {
             return;
         }
@@ -63,43 +64,97 @@ public class WeaponInventory : MonoBehaviour
         _currentIndex = index;
 
         CurrentWeapon.gameObject.SetActive(true);
+
+        ActiveSlotChanged?.Invoke(_currentIndex);
         WeaponChanged?.Invoke(CurrentWeapon);
     }
 
     public void PickupWeapon(Weapon weaponPrefab)
     {
-        foreach (var equipped in _equippedWeapons)
+        int targetSlot = weaponPrefab.AssignedSlot;
+
+        if (IsValidIndex(targetSlot) == false || _slots[targetSlot] != null)
         {
-            if (equipped.AnimIndex == weaponPrefab.AnimIndex)
+            return;
+        }
+
+        Weapon newWeapon = Instantiate(weaponPrefab, transform);
+        SetupParentConstraint(newWeapon.gameObject);
+
+        newWeapon.gameObject.SetActive(false);
+        newWeapon.Initialize(_playerCamera, _worldFXContainer);
+
+        _slots[targetSlot] = newWeapon;
+
+        SlotUpdated?.Invoke(targetSlot, newWeapon);
+
+        SelectWeapon(targetSlot);
+    }
+
+    public void ResetWeapons()
+    {
+        if (CurrentWeapon != null)
+        {
+            CurrentWeapon.ReleaseTrigger();
+        }
+
+        _currentIndex = -1;
+        WeaponChanged?.Invoke(null);
+        ActiveSlotChanged?.Invoke(-1);
+
+        for (int i = 0; i < _slots.Length; i++)
+        {
+            if (_slots[i] != null)
             {
-                return;
+                Destroy(_slots[i].gameObject);
+                _slots[i] = null;
+            }
+
+            SlotUpdated?.Invoke(i, null);
+        }
+
+        SpawnStartingWeapons();
+    }
+
+    private void SpawnStartingWeapons()
+    {
+        foreach (var prefab in _startingWeaponPrefabs)
+        {
+            if (prefab != null)
+            {
+                PickupWeapon(prefab);
+            }
+        }
+    }
+
+    private void SetupParentConstraint(GameObject target)
+    {
+        ParentConstraint constraint = target.AddComponent<ParentConstraint>();
+        ConstraintSource source = new ConstraintSource { sourceTransform = _weaponHolder, weight = 1f };
+        constraint.AddSource(source);
+        constraint.SetTranslationOffset(0, Vector3.zero);
+        constraint.SetRotationOffset(0, Vector3.zero);
+        constraint.constraintActive = true;
+        constraint.locked = true;
+    }
+
+    private int GetEquippedWeaponsCount()
+    {
+        int count = 0;
+
+        foreach (var weapon in _slots)
+        {
+            if (weapon != null)
+            {
+                count++;
             }
         }
 
-        Weapon newWeapon = Instantiate(weaponPrefab, gameObject.transform);
+        return count;
+    }
 
-        ParentConstraint constraint = newWeapon.gameObject.AddComponent<ParentConstraint>();
-
-        ConstraintSource source = new ConstraintSource();
-        source.sourceTransform = _weaponHolder;
-        source.weight = 1;
-        constraint.AddSource(source);
-
-        constraint.SetTranslationOffset(0, Vector3.zero);
-        constraint.SetRotationOffset(0, Vector3.zero);
-
-        constraint.constraintActive = true;
-        constraint.locked = true;
-
-        newWeapon.gameObject.SetActive(false);
-
-        newWeapon.Initialize(_playerCamera);
-
-        _equippedWeapons.Add(newWeapon);
-
-        if (_equippedWeapons.Count == 1)
-        {
-            SelectWeapon(0);
-        }
+    private bool IsValidIndex(int index)
+    {
+        return index >= 0 && index < _slots.Length;
     }
 }
