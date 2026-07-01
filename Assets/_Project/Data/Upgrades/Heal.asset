@@ -12,12 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cf6eca430b8e1d4ca21eecd2507b5c2, type: 3}
   m_Name: Heal
   m_EditorClassIdentifier: 
-  Title: "\u041B\u0435\u0447\u0435\u043D\u0438\u0435"
-  Description: "\u0412\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C
-    {0} \u0437\u0434\u043E\u0440\u043E\u0432\u044C\u044F"
-  Icon: {fileID: 0}
-  Type: 0
-  WeaponPrefab: {fileID: 0}
+  _title: "\u041B\u0435\u0447\u0435\u043D\u0438\u0435"
+  _description: "\u0412\u044B\u043B\u0435\u0447\u0438\u0442\u044C\u0441\u044F \u043D\u0430
+    {0} \u0445\u043F"
+  _icon: {fileID: 0}
+  _type: 0
+  _weaponPrefab: {fileID: 0}
+  _isOneTime: 0
   _isRandomValue: 1
   _minValue: 10
   _maxValue: 100

@@ -49,12 +49,12 @@ GameObject:
   - component: {fileID: 1945896459907062184}
   - component: {fileID: 73634477505576123}
   - component: {fileID: 6365642903469814469}
-  - component: {fileID: 5887580941239244805}
   - component: {fileID: 9127179442867818386}
   - component: {fileID: 1962839438609065859}
   - component: {fileID: 5613625299427541638}
   - component: {fileID: 4795147399727167818}
   - component: {fileID: 1127343372600070611}
+  - component: {fileID: 8730695650762835266}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -95,7 +95,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 8bb5bf6a86cf3b34ca73ad4a9fc66266, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_WarningMessage: 
@@ -121,10 +121,10 @@ MonoBehaviour:
   _crouchController: {fileID: 9127179442867818386}
   _rotation: {fileID: 3911248707200276545}
   _groundDetector: {fileID: 73634477505576123}
+  _stats: {fileID: 8730695650762835266}
   _weaponInventory: {fileID: 5613625299427541638}
   _animation: {fileID: 6365642903469814469}
   _weaponUI: {fileID: 0}
-  _crosshairUI: {fileID: 0}
 --- !u!114 &3911248707200276545
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -141,8 +141,7 @@ MonoBehaviour:
   _animator: {fileID: 8739224369855424728}
   _normalCamera: {fileID: 0}
   _aimCamera: {fileID: 0}
-  _sensitivityX: 25
-  _sensitivityY: 25
+  _sensitivityData: {fileID: 11400000, guid: be14f0405c03d7b41bd5f0a153694325, type: 2}
   _minPitch: -40
   _maxPitch: 60
   _spineBendingWeight: 0.5
@@ -246,74 +245,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fa50bc71308dca48bb3df687052b952, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &5887580941239244805
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 506626055124890934}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b2d8418b0b9634b1892b0268dd9c2743, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  boneShape: 1
-  drawBones: 0
-  drawTripods: 0
-  boneSize: 2.52
-  tripodSize: 1
-  boneColor: {r: 0, g: 0, b: 1, a: 0.5}
-  m_Transforms:
-  - {fileID: 6004779131910118270}
-  - {fileID: 290447553139879639}
-  - {fileID: 4810857515808785845}
-  - {fileID: 2074588342513317274}
-  - {fileID: 2625201670585306630}
-  - {fileID: 2850449683301638635}
-  - {fileID: 3610676556564882887}
-  - {fileID: 6715359526361675435}
-  - {fileID: 6491011071200273962}
-  - {fileID: 5225294209034681981}
-  - {fileID: 8685765443526101468}
-  - {fileID: 1857156251438368239}
-  - {fileID: 7580683521121142889}
-  - {fileID: 451164105792621921}
-  - {fileID: 192241193464211817}
-  - {fileID: 318649164715276059}
-  - {fileID: 677879837746785362}
-  - {fileID: 5723196156531162199}
-  - {fileID: 8938883076519909406}
-  - {fileID: 800950574115589850}
-  - {fileID: 1152331789684019283}
-  - {fileID: 7309142022402301447}
-  - {fileID: 2862568021276355853}
-  - {fileID: 5044732425428605217}
-  - {fileID: 2377769862375396408}
-  - {fileID: 6009671123817610493}
-  - {fileID: 3232836106293759919}
-  - {fileID: 5781777277573421424}
-  - {fileID: 2142147825977475335}
-  - {fileID: 7825607001987143493}
-  - {fileID: 2854838379417124708}
-  - {fileID: 5510602183765931401}
-  - {fileID: 498917229725781946}
-  - {fileID: 5605113317819695326}
-  - {fileID: 9184157853033587560}
-  - {fileID: 8215192048258720175}
-  - {fileID: 6580093860613953940}
-  - {fileID: 4183736879771738986}
-  - {fileID: 3150244829279893844}
-  - {fileID: 289178982497459267}
-  - {fileID: 82857222296507999}
-  - {fileID: 193117460002730587}
-  - {fileID: 2625706928610291189}
-  - {fileID: 3703170303298873561}
-  - {fileID: 1964222734951242486}
-  - {fileID: 2748680359562977058}
-  - {fileID: 1777485727174535193}
-  - {fileID: 6525804663578881007}
-  - {fileID: 1208445500054288547}
 --- !u!114 &9127179442867818386
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -360,7 +291,6 @@ MonoBehaviour:
   _playerCamera: {fileID: 0}
   _startingWeaponPrefabs:
   - {fileID: 5920395101074839316, guid: 4d5c869ec91d2c44c9a82dbee2a11e7a, type: 3}
-  - {fileID: 7730452321155999779, guid: eb45271925fb34343870747b43ee5874, type: 3}
   _worldFXContainer: {fileID: 2833029144436224247}
 --- !u!114 &4795147399727167818
 MonoBehaviour:
@@ -481,6 +411,18 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &8730695650762835266
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 506626055124890934}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d071ffb29c214554396bb55cb18331d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &801570188550517205
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,31 +9,16 @@ public class Player : MonoBehaviour
     [SerializeField] private PlayerCrouch _crouchController;
     [SerializeField] private PlayerRotation _rotation;
     [SerializeField] private GroundDetector _groundDetector;
+    [SerializeField] private PlayerStats _stats;
 
     [SerializeField] private WeaponInventory _weaponInventory;
-
     [SerializeField] private PlayerAnimation _animation;
-    [SerializeField] private WeaponUI _weaponUI;
-    [SerializeField] private CrosshairUI _crosshairUI;
 
     private Weapon _activeWeapon;
     private bool _isAimingRequested;
 
+    public int UpgradesCount => _stats.UpgradesCount;
     public Health Health => _playerHealth;
-    public event Action Died;
-
-    public float DamageMultiplier { get; private set; } = 1f;
-    public float ReloadSpeedMultiplier { get; private set; } = 1f;
-    public float FireRateMultiplier { get; private set; } = 1f;
-    public float MoveSpeedMultiplier { get; private set; } = 1f;
-
-    private void Update()
-    {
-        if (_activeWeapon != null)
-        {
-            _crosshairUI.UpdateSpread(_activeWeapon.CurrentSpread);
-        }
-    }
 
     private void OnEnable()
     {
@@ -53,15 +38,15 @@ public class Player : MonoBehaviour
         _input.AimReleased += OnAimReleased;
         _input.ReloadPressed += OnReloadRequested;
         _input.WeaponScrolled += _weaponInventory.ScrollWeapon;
+        _input.WeaponChanged += _weaponInventory.SelectWeapon;
 
         _weaponInventory.WeaponChanged += OnWeaponChanged;
+        _stats.MoveSpeedMultiplierChanged += OnMoveSpeedChanged;
 
         if (_weaponInventory.CurrentWeapon != null)
         {
             OnWeaponChanged(_weaponInventory.CurrentWeapon);
         }
-
-        _playerHealth.Died += OnPlayerDie;
     }
 
     private void OnDisable()
@@ -82,80 +67,47 @@ public class Player : MonoBehaviour
         _input.AimReleased -= OnAimReleased;
         _input.ReloadPressed -= OnReloadRequested;
         _input.WeaponScrolled -= _weaponInventory.ScrollWeapon;
+        _input.WeaponChanged -= _weaponInventory.SelectWeapon;
 
         _weaponInventory.WeaponChanged -= OnWeaponChanged;
+        _stats.MoveSpeedMultiplierChanged -= OnMoveSpeedChanged;
 
         if (_activeWeapon != null)
         {
             _activeWeapon.Fired -= OnWeaponFired;
         }
-
-        _playerHealth.Died -= OnPlayerDie;
     }
 
     public void ApplyUpgrade(UpgradeType type, float value, Weapon weaponPrefab)
     {
-        switch (type)
+        if (type == UpgradeType.NewWeapon)
         {
-            case UpgradeType.Heal:
-                _playerHealth.Heal(value);
-                break;
-
-            case UpgradeType.NewWeapon:
-                if (weaponPrefab != null)
-                {
-                    _weaponInventory.PickupWeapon(weaponPrefab);
-                }
-                break;
-
-            case UpgradeType.DamageBuff:
-                DamageMultiplier += value;
-                break;
-
-            case UpgradeType.ReloadSpeedBuff:
-                ReloadSpeedMultiplier += value;
-                break;
-
-            case UpgradeType.MoveSpeedBuff:
-                MoveSpeedMultiplier += value;
-                _mover.SetSpeedMultiplier(MoveSpeedMultiplier);
-                _animation.SetSpeedMultiplier(MoveSpeedMultiplier);
-                break;
+            if (weaponPrefab != null) _weaponInventory.PickupWeapon(weaponPrefab);
+            return;
         }
+
+        if (type == UpgradeType.Heal)
+        {
+            _playerHealth.Heal(value);
+            return;
+        }
+
+        _stats.ApplyUpgrade(type, value);
     }
 
     public void ResetStatus()
     {
         _playerHealth.ResetHealth();
         _weaponInventory.ResetWeapons();
-
-        DamageMultiplier = 1f;
-        ReloadSpeedMultiplier = 1f;
-        FireRateMultiplier = 1f;
-        MoveSpeedMultiplier = 1f;
-        _mover.SetSpeedMultiplier(1f);
-        _animation.SetSpeedMultiplier(1f);
+        _stats.Reset();
 
         _isAimingRequested = false;
         UpdateAimState();
     }
 
-    private void OnShootPressed()
-    {
-        if (_weaponInventory.CurrentWeapon != null)
-        {
-            _weaponInventory.CurrentWeapon.PullTrigger();
-        }
-            
-    }
-
-    private void OnShootReleased()
-    {
-        if (_weaponInventory.CurrentWeapon != null)
-        {
-            _weaponInventory.CurrentWeapon.ReleaseTrigger();
-        }
-    }
+    private void OnShootPressed() => _activeWeapon?.PullTrigger();
+    private void OnShootReleased() => _activeWeapon?.ReleaseTrigger();
+    private void OnReloadRequested() => _activeWeapon?.StartReload();
 
     private void OnAimPressed()
     {
@@ -171,27 +123,17 @@ public class Player : MonoBehaviour
 
     private void UpdateAimState()
     {
-        if (_activeWeapon != null && _isAimingRequested)
-        {
-            _activeWeapon.SetAimState(true);
-            _rotation.StartAiming();
-        }
-        else
-        {
-            if (_activeWeapon != null)
-            {
-                _activeWeapon.SetAimState(false);
-            }
-            _rotation.StopAiming();
-        }
+        bool state = _activeWeapon != null && _isAimingRequested;
+        _activeWeapon?.SetAimState(state);
+
+        if (state) _rotation.StartAiming();
+        else _rotation.StopAiming();
     }
 
-    private void OnReloadRequested()
+    private void OnMoveSpeedChanged(float multiplier)
     {
-        if (_activeWeapon != null)
-        {
-            _activeWeapon.StartReload();
-        }
+        _mover.SetSpeedMultiplier(multiplier);
+        _animation.SetSpeedMultiplier(multiplier);
     }
 
     private void OnWeaponChanged(Weapon newWeapon)
@@ -199,18 +141,15 @@ public class Player : MonoBehaviour
         if (_activeWeapon != null)
         {
             _activeWeapon.Fired -= OnWeaponFired;
-            _activeWeapon.ReloadStarted -= OnWeaponReloadStarted;
             _activeWeapon.ReleaseTrigger();
         }
 
         _activeWeapon = newWeapon;
-        _weaponUI.UpdateActiveWeapon(_activeWeapon);
 
         if (_activeWeapon != null)
         {
             _animation.SetWeaponHoldType(_activeWeapon.AnimIndex);
             _activeWeapon.Fired += OnWeaponFired;
-            _activeWeapon.ReloadStarted += OnWeaponReloadStarted;
             UpdateAimState();
         }
     }
@@ -219,15 +158,7 @@ public class Player : MonoBehaviour
     {
         _animation.PlayAttack();
 
-        if (_activeWeapon != null && _rotation != null)
-        {
-            _rotation.ApplyRecoil(_activeWeapon.RecoilPitch, _activeWeapon.RecoilYaw);
-        }
-    }
-
-    private void OnWeaponReloadStarted()
-    {
-        //_animation.PlayReload();
+        _rotation.ApplyRecoil(_activeWeapon.RecoilPitch, _activeWeapon.RecoilYaw);
     }
 
     private void OnJumpRequested()
@@ -237,10 +168,5 @@ public class Player : MonoBehaviour
             _mover.Jump();
             _animation.PlayJump();
         }
-    }
-
-    private void OnPlayerDie()
-    {
-        Died?.Invoke();
     }
 }

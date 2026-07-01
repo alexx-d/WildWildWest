@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class CrosshairUI : MonoBehaviour
 {
+    [SerializeField] private WeaponInventory _inventory;
     [SerializeField] private RectTransform _leftDash;
     [SerializeField] private RectTransform _rightDash;
     [SerializeField] private RectTransform _topDash;
@@ -21,17 +22,26 @@ public class CrosshairUI : MonoBehaviour
 
     private void Update()
     {
+        if (_inventory != null && _inventory.CurrentWeapon != null)
+        {
+            UpdateSpread(_inventory.CurrentWeapon.CurrentSpread);
+        }
+        else
+        {
+            _currentTargetSize = _minSize;
+        }
+
         if (Mathf.Approximately(_currentSize, _currentTargetSize))
         {
             return;
         }
-            
+
         _currentSize = Mathf.Lerp(_currentSize, _currentTargetSize, Time.deltaTime * _smoothTime);
 
         ApplySize(_currentSize);
     }
 
-    public void UpdateSpread(float currentSpread)
+    private void UpdateSpread(float currentSpread)
     {
         _currentTargetSize = _minSize + (currentSpread * _spreadMultiplier);
     }

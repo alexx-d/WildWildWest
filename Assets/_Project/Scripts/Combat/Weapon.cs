@@ -11,11 +11,10 @@ public class Weapon : MonoBehaviour
     private float _nextFireTime;
     private bool _isTriggerPulled;
     private bool _isAiming;
-
     private int _currentAmmo;
     private bool _isReloading;
 
-    private Player _player;
+    private IWeaponModifiers _modifiers;
 
     public event Action Fired;
     public event Action ReloadStarted;
@@ -49,11 +48,6 @@ public class Weapon : MonoBehaviour
         _currentAmmo = _data.MagazineSize;
     }
 
-    private void Start()
-    {
-        _player = GetComponentInParent<Player>();
-    }
-
     private void Update()
     {
         if (_isTriggerPulled)
@@ -62,10 +56,11 @@ public class Weapon : MonoBehaviour
         }
     }
 
-    public void Initialize(Camera playerCamera, Transform worldFXContainer)
+    public void Initialize(Camera playerCamera, Transform worldFXContainer, IWeaponModifiers modifiers)
     {
         _hitscanShooter.Initialize(playerCamera);
         _weaponFX.Initialize(worldFXContainer);
+        _modifiers = modifiers;
     }
 
     public void PullTrigger()
@@ -93,27 +88,13 @@ public class Weapon : MonoBehaviour
         StartCoroutine(ReloadCoroutine());
     }
 
-    public void ResetWeapon()
-    {
-        if (_isReloading)
-        {
-            StopAllCoroutines();
-            _isReloading = false;
-        }
-
-        _isTriggerPulled = false;
-        _isAiming = false;
-
-        _currentAmmo = _data.MagazineSize;
-        AmmoChanged?.Invoke();
-    }
-
     private IEnumerator ReloadCoroutine()
     {
         _isReloading = true;
         ReloadStarted?.Invoke();
 
-        yield return new WaitForSeconds(_data.ReloadDuration / _player.ReloadSpeedMultiplier);
+        float reloadSpeed = _modifiers?.ReloadSpeedMultiplier ?? 1f;
+        yield return new WaitForSeconds(_data.ReloadDuration / reloadSpeed);
 
         _currentAmmo = _data.MagazineSize;
         _isReloading = false;
@@ -134,7 +115,8 @@ public class Weapon : MonoBehaviour
             return;
         }
 
-        _nextFireTime = Time.time + (_data.FireRate / _player.FireRateMultiplier);
+        float fireRateMod = _modifiers?.FireRateMultiplier ?? 1f;
+        _nextFireTime = Time.time + (_data.FireRate / fireRateMod);
 
         _currentAmmo--;
         AmmoChanged?.Invoke();
@@ -147,7 +129,8 @@ public class Weapon : MonoBehaviour
         {
             float currentSpread = CurrentSpread;
 
-            int finalDamage = Mathf.RoundToInt(_data.Damage * _player.DamageMultiplier);
+            float damageModifier = _modifiers?.DamageMultiplier ?? 1f;
+            int finalDamage = Mathf.RoundToInt(_data.Damage * damageModifier);
 
             _hitscanShooter.Fire(finalDamage, _data.Range, currentSpread, Vector3.zero);
         }

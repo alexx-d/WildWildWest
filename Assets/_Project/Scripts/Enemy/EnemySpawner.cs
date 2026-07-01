@@ -9,10 +9,10 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private Transform _projectilesContainer;
 
     private readonly Dictionary<Enemy, ComponentPool<Enemy>> _poolsDictionary = new();
+    private readonly List<Enemy> _activeEnemies = new();
+
     private Transform _playerTransform;
     private Health _playerHealth;
-
-    private readonly List<Enemy> _activeEnemies = new List<Enemy>();
 
     public event Action OnEnemyKilled;
 
@@ -37,23 +37,20 @@ public class EnemySpawner : MonoBehaviour
         {
             agent.Warp(position);
         }
-        else
-        {
-            enemy.transform.position = position;
-        }
 
         enemy.SetupTarget(_playerTransform, _playerHealth, _projectilesContainer);
-
         enemy.Died += HandleEnemyDeath;
     }
 
     public void ClearAllPools()
     {
-        foreach (var enemy in _activeEnemies)
+        for (int i = _activeEnemies.Count - 1; i >= 0; i--)
         {
+            Enemy enemy = _activeEnemies[i];
             if (enemy != null)
             {
                 enemy.Died -= HandleEnemyDeath;
+                enemy.gameObject.SetActive(false);
             }
         }
 

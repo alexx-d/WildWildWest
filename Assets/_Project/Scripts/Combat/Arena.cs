@@ -14,7 +14,10 @@ public class Arena : MonoBehaviour
     {
         foreach (var barrier in _arenaBarriers)
         {
-            if (barrier != null) barrier.SetActive(isActive);
+            if (barrier != null)
+            {
+                barrier.SetActive(isActive);
+            }
         }
     }
 }

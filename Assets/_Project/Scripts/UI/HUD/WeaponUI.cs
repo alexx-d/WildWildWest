@@ -4,7 +4,7 @@ using DG.Tweening;
 
 public class WeaponUI : MonoBehaviour
 {
-    [Header("UI Elements")]
+    [SerializeField] private WeaponInventory _weaponInventory;
     [SerializeField] private TMP_Text _ammoText;
 
     [Header("Juice Settings")]
@@ -13,13 +13,32 @@ public class WeaponUI : MonoBehaviour
 
     private Weapon _currentWeapon;
 
+    private void OnEnable()
+    {
+        if (_weaponInventory != null)
+        {
+            _weaponInventory.WeaponChanged += UpdateActiveWeapon;
+            
+            UpdateActiveWeapon(_weaponInventory.CurrentWeapon);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (_weaponInventory != null)
+        {
+            _weaponInventory.WeaponChanged -= UpdateActiveWeapon;
+        }
+
+        UnsubscribeFromCurrentWeapon();
+        
+        _ammoText.transform.DOKill();
+        _ammoText.DOKill();
+    }
+
     public void UpdateActiveWeapon(Weapon newWeapon)
     {
-        if (_currentWeapon != null)
-        {
-            _currentWeapon.AmmoChanged -= OnAmmoChanged;
-            _currentWeapon.ReloadStarted -= OnReloadStarted;
-        }
+        UnsubscribeFromCurrentWeapon();
 
         _currentWeapon = newWeapon;
 
@@ -29,10 +48,22 @@ public class WeaponUI : MonoBehaviour
             _currentWeapon.ReloadStarted += OnReloadStarted;
 
             RefreshText();
+
+            _ammoText.DOKill();
+            _ammoText.alpha = 1f;
         }
         else
         {
             _ammoText.text = "- / -";
+        }
+    }
+
+    private void UnsubscribeFromCurrentWeapon()
+    {
+        if (_currentWeapon != null)
+        {
+            _currentWeapon.AmmoChanged -= OnAmmoChanged;
+            _currentWeapon.ReloadStarted -= OnReloadStarted;
         }
     }
 
@@ -61,15 +92,5 @@ public class WeaponUI : MonoBehaviour
 
         _ammoText.DOKill();
         _ammoText.DOFade(0.3f, 0.3f).SetLoops(-1, LoopType.Yoyo);
-    }
-
-    private void OnDisable()
-    {
-        if (_currentWeapon != null)
-        {
-            _currentWeapon.AmmoChanged -= OnAmmoChanged;
-            _currentWeapon.ReloadStarted -= OnReloadStarted;
-        }
-        _ammoText.transform.DOKill();
     }
 }

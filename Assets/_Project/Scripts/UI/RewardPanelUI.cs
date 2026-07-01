@@ -2,26 +2,22 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RewardPanelUI : MonoBehaviour
+public class RewardPanelUI : Window
 {
-    [SerializeField] private GameObject _panelRoot;
     [SerializeField] private List<UpgradeCardUI> _uiCards;
-    [SerializeField] private List<UpgradeData> _allUpgradesPool;
 
-    public event Action<UpgradeData> UpgradeSelected;
+    public event Action<RuntimeUpgrade> UpgradeSelected;
 
-    public void ShowRewardSelection()
+    public void Open(List<RuntimeUpgrade> upgradesToShow)
     {
-        _panelRoot.SetActive(true);
-
-        List<UpgradeData> randomCards = GetRandomUniqueUpgrades(3);
+        base.Open();
 
         for (int i = 0; i < _uiCards.Count; i++)
         {
-            if (i < randomCards.Count)
+            if (i < upgradesToShow.Count)
             {
                 _uiCards[i].gameObject.SetActive(true);
-                _uiCards[i].Setup(randomCards[i], OnCardChosen);
+                _uiCards[i].Setup(upgradesToShow[i], OnCardChosen);
             }
             else
             {
@@ -30,31 +26,9 @@ public class RewardPanelUI : MonoBehaviour
         }
     }
 
-    private List<UpgradeData> GetRandomUniqueUpgrades(int count)
+    private void OnCardChosen(RuntimeUpgrade chosenUpgrade)
     {
-        List<UpgradeData> poolCopy = new List<UpgradeData>(_allUpgradesPool);
-        List<UpgradeData> result = new List<UpgradeData>();
-
-        for (int i = 0; i < count; i++)
-        {
-            if (poolCopy.Count == 0) break;
-
-            int randomIndex = UnityEngine.Random.Range(0, poolCopy.Count);
-            UpgradeData original = poolCopy[randomIndex];
-
-            UpgradeData runtimeClone = Instantiate(original);
-
-            runtimeClone.InitializeValue();
-
-            result.Add(runtimeClone);
-            poolCopy.RemoveAt(randomIndex);
-        }
-        return result;
-    }
-
-    private void OnCardChosen(UpgradeData chosenUpgrade)
-    {
-        _panelRoot.SetActive(false);
+        Close();
         UpgradeSelected?.Invoke(chosenUpgrade);
     }
 }

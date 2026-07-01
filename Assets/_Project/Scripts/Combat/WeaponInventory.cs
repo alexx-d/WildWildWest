@@ -80,14 +80,13 @@ public class WeaponInventory : MonoBehaviour
 
         Weapon newWeapon = Instantiate(weaponPrefab, transform);
         SetupParentConstraint(newWeapon.gameObject);
-
         newWeapon.gameObject.SetActive(false);
-        newWeapon.Initialize(_playerCamera, _worldFXContainer);
+
+        IWeaponModifiers modifiers = GetComponent<IWeaponModifiers>();
+        newWeapon.Initialize(_playerCamera, _worldFXContainer, modifiers);
 
         _slots[targetSlot] = newWeapon;
-
         SlotUpdated?.Invoke(targetSlot, newWeapon);
-
         SelectWeapon(targetSlot);
     }
 

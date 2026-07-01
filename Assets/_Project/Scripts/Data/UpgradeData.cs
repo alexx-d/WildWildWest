@@ -3,41 +3,46 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewUpgrade", menuName = "Gameplay/Upgrade Card")]
 public class UpgradeData : ScriptableObject
 {
-    public string Title;
-    [TextArea]
-    [Tooltip("Используй {0} в тексте, чтобы подставить значение. Например: 'Урон +{0}%'")]
-    public string Description;
-    public Sprite Icon;
+    [SerializeField] private string _title;
+    [SerializeField][TextArea] private string _description;
+    [SerializeField] private Sprite _icon;
 
-    public UpgradeType Type;
-    public Weapon WeaponPrefab;
+    [SerializeField] private UpgradeType _type;
+    [SerializeField] private Weapon _weaponPrefab;
 
     [Header("Рандомизация значения")]
+    [SerializeField] private bool _isOneTime = false;
     [SerializeField] private bool _isRandomValue = false;
     [SerializeField] private float _minValue;
     [SerializeField] private float _maxValue;
-
-    [Tooltip("Чем выше степень, тем меньше шанс получить максимальное значение. 2 — хорошо, 3 — очень редкие хай-роллы.")]
     [SerializeField] private float _skewExponent = 2f;
 
     [Header("Настройки отображения в UI")]
     [SerializeField] private bool _showAsPercentage = true;
+    [SerializeField] private UpgradeRarity _staticRarity = UpgradeRarity.Rare;
 
-    public float Value { get; private set; }
+    public string Title => _title;
+    public string Description => _description;
+    public Sprite Icon => _icon;
+    public UpgradeType Type => _type;
+    public bool IsOneTime => _isOneTime;
+    public Weapon WeaponPrefab => _weaponPrefab;
     public bool ShowAsPercentage => _showAsPercentage;
 
-    public void InitializeValue()
+    public bool IsRandomValue => _isRandomValue;
+    public float MinValue => _minValue;
+    public float MaxValue => _maxValue;
+    public UpgradeRarity StaticRarity => _staticRarity;
+
+    public float RollValue()
     {
         if (_isRandomValue == false)
         {
-            Value = _minValue;
-            return;
+            return _minValue;
         }
 
         float t = Mathf.Pow(Random.value, _skewExponent);
-
         float rawValue = Mathf.Lerp(_minValue, _maxValue, t);
-
-        Value = Mathf.Round(rawValue * 100f) / 100f;
+        return Mathf.Round(rawValue * 100f) / 100f;
     }
 }

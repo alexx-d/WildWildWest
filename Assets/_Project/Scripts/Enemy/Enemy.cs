@@ -30,34 +30,35 @@ public class Enemy : MonoBehaviour, IPoolable<Enemy>
         _chase.enabled = true;
         _attack.enabled = true;
 
-        _chase.SpeedChanged += OnSpeedChanged;
+        _chase.MovementChanged += OnMovementChanged;
         _attack.Attacked += _animator.PlayAttack;
-
         _health.Died += OnEnemyDead;
     }
+
     private void OnDisable()
     {
-        _chase.SpeedChanged -= OnSpeedChanged;
+        _chase.MovementChanged -= OnMovementChanged;
         _attack.Attacked -= _animator.PlayAttack;
-
         _health.Died -= OnEnemyDead;
+
+        _chase.StopChasing();
     }
-    
+
     public void SetupTarget(Transform player, Health playerHealth, Transform projectileContainer)
     {
-        _chase.Initialize(_config, player, _attack.AttackDistance);
         _attack.Initialize(player, playerHealth, projectileContainer);
+        _chase.Initialize(_config, player, _attack.AttackDistance);
     }
 
-    private void OnSpeedChanged(float speed)
+    private void OnMovementChanged(float velocityX, float velocityY, float speedMultiplier)
     {
-        _animator.SetSpeed(speed);
+        _animator.SetMovementVelocity(velocityX, velocityY, speedMultiplier);
     }
 
     private void OnEnemyDead()
     {
         SetPhysicsActive(false);
-        _chase.enabled = false;
+        _chase.StopChasing();
         _attack.enabled = false;
 
         Died?.Invoke(this);
@@ -66,10 +67,7 @@ public class Enemy : MonoBehaviour, IPoolable<Enemy>
 
     private void SetPhysicsActive(bool isActive)
     {
-        if (_allColliders == null)
-        {
-            return;
-        }
+        if (_allColliders == null) return;
 
         foreach (var col in _allColliders)
         {

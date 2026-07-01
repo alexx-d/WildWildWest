@@ -1,5 +1,6 @@
 using Cinemachine;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Game : MonoBehaviour
@@ -11,7 +12,7 @@ public class Game : MonoBehaviour
 
     [SerializeField] private ScreenTransitionUI _screenTransition;
     [SerializeField] private UIViewSwitcher _uiViewSwitcher;
-    [SerializeField] private RewardPanelUI _rewardPanelUI;
+    [SerializeField] private UpgradeProvider _upgradeProvider;
 
     [SerializeField] private BackgroundMusic _backgroundMusic;
 
@@ -50,12 +51,12 @@ public class Game : MonoBehaviour
         _playerInput.PausePressed += PauseGame;
         _playerInput.UnpausePressed += ResumeGame;
 
-        _player.Died += OnPlayerDie;
+        _player.Health.Died += OnPlayerDie;
         _waveSpawner.CampaignCompleted += OnCampaignWin;
         _waveSpawner.FirstArenaPrepared += OnFirstArenaPrepared;
         _waveSpawner.WaveCompleted += OnWaveCompleted;
 
-        _rewardPanelUI.UpgradeSelected += OnUpgradeRewardSelected;
+        _uiViewSwitcher.RewardPanelScreen.UpgradeSelected += OnUpgradeRewardSelected;
     }
 
     private void OnDisable()
@@ -70,12 +71,12 @@ public class Game : MonoBehaviour
         _playerInput.PausePressed -= PauseGame;
         _playerInput.UnpausePressed -= ResumeGame;
 
-        _player.Died -= OnPlayerDie;
+        _player.Health.Died += OnPlayerDie;
         _waveSpawner.CampaignCompleted -= OnCampaignWin;
         _waveSpawner.FirstArenaPrepared -= OnFirstArenaPrepared;
         _waveSpawner.WaveCompleted -= OnWaveCompleted;
 
-        _rewardPanelUI.UpgradeSelected -= OnUpgradeRewardSelected;
+        _uiViewSwitcher.RewardPanelScreen.UpgradeSelected -= OnUpgradeRewardSelected;
     }
     private void OnWaveCompleted()
     {
@@ -85,12 +86,14 @@ public class Game : MonoBehaviour
         SetCursorState(isLocked: false);
         _playerInput.EnableMenuInput();
 
-        _rewardPanelUI.ShowRewardSelection();
+        List<RuntimeUpgrade> availableUpgrades = _upgradeProvider.GetRandomUpgrades(_player.UpgradesCount);
+        _uiViewSwitcher.ShowRewardSelection(availableUpgrades);
     }
 
-    private void OnUpgradeRewardSelected(UpgradeData chosenUpgrade)
+    private void OnUpgradeRewardSelected(RuntimeUpgrade chosenUpgrade)
     {
-        _player.ApplyUpgrade(chosenUpgrade.Type, chosenUpgrade.Value, chosenUpgrade.WeaponPrefab);
+        _player.ApplyUpgrade(chosenUpgrade.Data.Type, chosenUpgrade.Value, chosenUpgrade.Data.WeaponPrefab);
+        _upgradeProvider.RemoveIfOneTime(chosenUpgrade.Data);
 
         Time.timeScale = 1;
         _backgroundMusic.RemovePauseEffects();
@@ -125,6 +128,7 @@ public class Game : MonoBehaviour
         _screenTransition.ResetUI();
 
         _uiViewSwitcher.ShowGameplayHUD();
+        _upgradeProvider.InitializePool();
 
         Time.timeScale = 1;
         _isPaused = false;

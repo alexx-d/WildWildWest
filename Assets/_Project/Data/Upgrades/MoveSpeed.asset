@@ -12,12 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cf6eca430b8e1d4ca21eecd2507b5c2, type: 3}
   m_Name: MoveSpeed
   m_EditorClassIdentifier: 
-  Title: "\u0423\u0432\u0435\u043B\u0438\u0447\u0438\u0442\u044C \u0441\u043A\u043E\u0440\u043E\u0441\u0442\u044C
-    \u0431\u0435\u0433\u0430"
-  Description: "+{0}% \u043A \u0441\u043A\u043E\u0440\u043E\u0441\u0442\u0438"
-  Icon: {fileID: 0}
-  Type: 4
-  WeaponPrefab: {fileID: 0}
+  _title: "\u0423\u0432\u0435\u043B\u0438\u0447\u0438\u0442\u044C \u0441\u043A\u043E\u0440\u043E\u0441\u0442\u044C"
+  _description: "\u0423\u0432\u0435\u043B\u0438\u0447\u0438\u0442\u044C \u0441\u043A\u043E\u0440\u043E\u0441\u0442\u044C
+    \u0431\u0435\u0433\u0430 \u043D\u0430 {0}%"
+  _icon: {fileID: 0}
+  _type: 4
+  _weaponPrefab: {fileID: 0}
+  _isOneTime: 0
   _isRandomValue: 1
   _minValue: 0.1
   _maxValue: 1

@@ -16,6 +16,7 @@ public class PlayerInputReader : MonoBehaviour, Controls.IPlayerActions, Control
     public event Action AimPressed;
     public event Action AimReleased;
     public event Action<float> WeaponScrolled;
+    public event Action<int> WeaponChanged;
 
     public event Action PausePressed;
     public event Action UnpausePressed;
@@ -96,6 +97,23 @@ public class PlayerInputReader : MonoBehaviour, Controls.IPlayerActions, Control
         float scrollValue = context.ReadValue<Vector2>().y;
 
         WeaponScrolled?.Invoke(scrollValue);
+    }
+
+    public void OnChangeWeapon(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            string controlName = context.control.name;
+            char lastChar = controlName[controlName.Length - 1];
+
+            if (char.IsDigit(lastChar))
+            {
+                int keyNumber = (int)char.GetNumericValue(lastChar);
+                int slotIndex = keyNumber - 1;
+
+                WeaponChanged?.Invoke(slotIndex);
+            }
+        }
     }
 
     public void OnJump(InputAction.CallbackContext context)

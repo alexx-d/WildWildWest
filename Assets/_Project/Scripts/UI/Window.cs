@@ -30,4 +30,12 @@ public abstract class Window : MonoBehaviour
         _windowGroup.interactable = false;
         _windowGroup.blocksRaycasts = false;
     }
+
+    private void OnValidate()
+    {
+        if (_windowGroup == null)
+        {
+            _windowGroup = GetComponent<CanvasGroup>();
+        }
+    }
 }

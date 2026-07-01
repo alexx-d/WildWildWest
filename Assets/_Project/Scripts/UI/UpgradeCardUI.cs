@@ -10,37 +10,45 @@ public class UpgradeCardUI : MonoBehaviour
     [SerializeField] private Image _iconImage;
     [SerializeField] private Button _selectButton;
 
-    private UpgradeData _data;
-    private Action<UpgradeData> _onSelectedCallback;
+    [SerializeField] private Image _cardBackground;
+    [SerializeField] private RarityColorConfig _colorConfig;
 
-    private void OnEnable() => _selectButton.onClick.AddListener(OnCardClicked);
-    private void OnDisable() => _selectButton.onClick.RemoveListener(OnCardClicked);
+    private RuntimeUpgrade _data;
+    private Action<RuntimeUpgrade> _onSelectedCallback;
 
-    public void Setup(UpgradeData data, Action<UpgradeData> onSelected)
+    private void OnEnable()
+    {
+        _selectButton.onClick.AddListener(OnCardClicked);
+    }
+
+    private void OnDisable()
+    {
+        _selectButton.onClick.RemoveListener(OnCardClicked);
+    }
+
+    public void Setup(RuntimeUpgrade data, Action<RuntimeUpgrade> onSelected)
     {
         _data = data;
         _onSelectedCallback = onSelected;
-        _titleText.text = data.Title;
 
+        _titleText.text = data.Data.Title;
         float displayValue = data.Value;
 
-        if (data.ShowAsPercentage)
+        if (data.Data.ShowAsPercentage)
         {
             displayValue = data.Value * 100f;
         }
 
-        if (data.Description.Contains("{0}"))
+        _descriptionText.text = data.GetDescription();
+
+        if (_iconImage != null && data.Data.Icon != null)
         {
-            _descriptionText.text = string.Format(data.Description, displayValue);
-        }
-        else
-        {
-            _descriptionText.text = data.Description;
+            _iconImage.sprite = data.Data.Icon;
         }
 
-        if (_iconImage != null && data.Icon != null)
+        if (_cardBackground != null && _colorConfig != null)
         {
-            _iconImage.sprite = data.Icon;
+            _cardBackground.color = _colorConfig.GetColor(data.Rarity);
         }
     }
 
